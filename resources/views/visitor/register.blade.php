@@ -16,11 +16,9 @@
 
         {{-- Header --}}
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-red-600/15 border border-red-600/30 mb-5 shadow-lg shadow-red-900/30">
-                <span class="text-4xl">🎡</span>
-            </div>
+            <img src="{{ asset('logo.png') }}" alt="Logo">
             <h1 class="text-4xl font-black text-white tracking-tight">
-                Lucky<span class="text-red-500">Spin</span>
+                Ayoo<span class="text-red-500">Wargiii</span>
             </h1>
             <p class="mt-2 text-gray-500 text-sm">Isi data kamu dan dapatkan kesempatan memenangkan hadiah menarik!</p>
         </div>

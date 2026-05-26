@@ -41,7 +41,7 @@
         {{-- Brand --}}
         <div class="mb-5">
             <h1 class="text-5xl font-black text-white tracking-tight leading-tight">
-                🎡 <span style="background: linear-gradient(to right, #EF4444, #FB7185); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text">Lucky Spin!</span>
+                <img src="{{ asset('logo.png') }}" alt="Logo"><span style="background: linear-gradient(to right, #EF4444, #FB7185); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text"></span>
             </h1>
             <p class="text-red-900/70 text-xs mt-2 tracking-[0.4em] uppercase font-semibold">Exhibition Booth · Prize Wheel</p>
         </div>
@@ -70,14 +70,8 @@
             <video
                 src="{{ asset('videos/promo.mp4') }}"
                 autoplay muted loop playsinline
-                class="absolute inset-0 w-full h-full object-cover"
+                class="absolute inset-0 w-full h-90 object-cover"
             ></video>
-            {{-- Placeholder shown behind the video if it fails to load --}}
-            <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <div class="text-4xl mb-3 opacity-20">🎬</div>
-                <p class="text-gray-700 text-sm">Letakkan video promosi di</p>
-                <p class="font-mono text-gray-600 text-xs mt-1">public/videos/promo.mp4</p>
-            </div>
         </div>
     </div>
 
