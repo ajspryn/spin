@@ -182,7 +182,8 @@ class DashboardController extends Controller
           $event = EventSetting::current();
           $event->update($data);
 
-          return back()->with('success',
+          return back()->with(
+               'success',
                "Pengaturan acara disimpan. Daily limit otomatis: stock ÷ {$data['total_days']} hari."
           );
      }
