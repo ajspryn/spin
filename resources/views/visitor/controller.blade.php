@@ -114,6 +114,9 @@
 </div>
 
 @push('scripts')
+<audio id="audio-spin" src="/sounds/spin.mp3" preload="auto"></audio>
+<audio id="audio-win" src="/sounds/win.mp3" preload="auto"></audio>
+<audio id="audio-zonk" src="/sounds/zonk.mp3" preload="auto"></audio>
 <style>
 @keyframes gentleSway {
     0%, 100% { transform: rotate(-6deg); }
@@ -130,12 +133,18 @@ function tabletController() {
         countdown: 5,
         _timer: null,
 
-        // ms — must match the TV wheel animation duration (6s + 200ms buffer)
-        WHEEL_DURATION: 6200,
+        // ms — must match the TV wheel animation duration (7s + 200ms buffer)
+        WHEEL_DURATION: 7200,
 
         init() {},
 
         _startSpinBar() {
+            // Play spin sound
+            const spinAudio = document.getElementById('audio-spin');
+            if (spinAudio) {
+                spinAudio.currentTime = 0;
+                spinAudio.play().catch(()=>{});
+            }
             this.$nextTick(() => {
                 const bar = this.$refs.spinBar;
                 if (!bar) return;
@@ -180,6 +189,18 @@ function tabletController() {
                 this.prizeName = data.prizeName;
                 this.claimCode = data.claimCode;
                 this.state     = data.isZonk ? 'zonk' : 'result';
+                // Play win/zonk sound
+                setTimeout(() => {
+                    const winAudio  = document.getElementById('audio-win');
+                    const zonkAudio = document.getElementById('audio-zonk');
+                    if (data.isZonk && zonkAudio) {
+                        zonkAudio.currentTime = 0;
+                        zonkAudio.play().catch(()=>{});
+                    } else if (!data.isZonk && winAudio) {
+                        winAudio.currentTime = 0;
+                        winAudio.play().catch(()=>{});
+                    }
+                }, 100);
 
             } catch (err) {
                 this.errorMessage = err.message;

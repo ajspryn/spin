@@ -24,6 +24,10 @@
 </head>
 <body class="bg-[#080404] text-white overflow-hidden select-none">
 
+<audio id="audio-spin" src="/sounds/spin.mp3" preload="auto"></audio>
+<audio id="audio-win" src="/sounds/win.mp3" preload="auto"></audio>
+<audio id="audio-zonk" src="/sounds/zonk.mp3" preload="auto"></audio>
+
 <div
     x-data="tvDisplay()"
     x-init="init()"
@@ -66,12 +70,15 @@
         </div>
 
         {{-- Promo video — letakkan video di public/videos/promo.mp4 --}}
-        <div class="flex-1 rounded-2xl overflow-hidden border border-red-950/40 bg-black/40 min-h-0 relative">
-            <video
-                src="{{ asset('videos/promo.mp4') }}"
-                autoplay muted loop playsinline
-                class="absolute inset-0 w-full h-90 object-cover"
-            ></video>
+        <div class="flex-1 flex items-center justify-center">
+            <div class="relative w-full" style="aspect-ratio: 16/9; max-width: 100%; max-height: 100%;">
+                <video
+                    src="{{ asset('videos/promo.mp4') }}"
+                    autoplay muted loop playsinline
+                    class="absolute inset-0 w-full h-full object-cover rounded-2xl border border-red-950/40 bg-black/40"
+                    style="aspect-ratio: 16/9;"
+                ></video>
+            </div>
         </div>
     </div>
 
@@ -205,6 +212,11 @@ function tvDisplay() {
         async init() {
             await this.loadPrizes();
             this.setupEcho();
+            // Preload sounds (for mobile autoplay policies)
+            ['audio-spin','audio-win','audio-zonk'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.load();
+            });
         },
 
         async loadPrizes() {
@@ -239,32 +251,58 @@ function tvDisplay() {
             this.isSpinning = true;
             this.state = 'spinning';
 
+            // Play spin sound
+            const spinAudio = document.getElementById('audio-spin');
+            if (spinAudio) {
+                spinAudio.currentTime = 0;
+                spinAudio.play().catch(()=>{});
+            }
+
             const numPrizes    = this.prizes.length;
             const segmentAngle = 360 / numPrizes;
-            const stopAngle    = (90 - ((prizeIndex + 0.5) * segmentAngle) % 360 + 360) % 360;
-            const baseRotation = this.currentRotation % 360;
-            // Dramatic multi-phase spin: fast → medium → slow → very slow
-            const totalSpins = 6 * 360; // total degrees to spin
-            const phase1 = 1.0 * 360; // fast (1s)
-            const phase2 = 1.5 * 360; // medium (1.5s)
-            const phase3 = 2.0 * 360; // slow (2s)
-            const phase4 = 1.5 * 360 + stopAngle - baseRotation; // final slow to stop (1.7s)
-            // Each phase: [degrees, duration, easing]
-            const phases = [
-                { deg: phase1, dur: 1000, ease: 'cubic-bezier(0.25,0.8,0.5,1)' },
-                { deg: phase2, dur: 1500, ease: 'cubic-bezier(0.4,0.7,0.6,1)' },
-                { deg: phase3, dur: 2000, ease: 'cubic-bezier(0.6,0.8,0.7,1)' },
-                { deg: phase4, dur: 1700, ease: 'cubic-bezier(0.8,0.9,0.9,1)' },
-            ];
-            let nextRotation = this.currentRotation;
-            let phaseIdx = 0;
-            const doPhase = () => {
-                if (phaseIdx >= phases.length) {
-                    // Done spinning, show result
-                    this.winner     = { name: visitorName, prize: prizeName, claimCode };
-                    this.isSpinning = false;
-                    this.currentRotation = (baseRotation + phase1 + phase2 + phase3 + phase4) % 360;
-                    this.transitionStyle = 'none';
+
+            // Where the wheel must stop: prize centre at the right-side pointer (0°)
+            const stopAngle      = (90 - ((prizeIndex + 0.5) * segmentAngle) % 360 + 360) % 360;
+            const currentBase    = this.currentRotation % 360;
+            const adjustment     = (stopAngle - currentBase + 360) % 360;
+
+            // 10 full rotations for a dramatic high-speed opening
+            const targetRotation = this.currentRotation + 10 * 360 + adjustment;
+            const startRotation  = this.currentRotation;
+            const totalDegrees   = targetRotation - startRotation;
+            const DURATION       = 7000; // ms — must match WHEEL_DURATION on the tablet
+            const startTime      = performance.now();
+
+            // Drive rotation directly on the DOM — bypasses Alpine reactivity each frame
+            this.transitionStyle = 'none';
+            const wrapper = document.getElementById('wheel-wrapper');
+
+            const animate = (now) => {
+                const t     = Math.min((now - startTime) / DURATION, 1);
+                // Quintic ease-out: blazing fast start → creeps to a dramatic stop
+                const eased = 1 - Math.pow(1 - t, 5);
+                const rot   = startRotation + totalDegrees * eased;
+                if (wrapper) wrapper.style.transform = `rotate(${rot}deg)`;
+
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Fully stopped — update Alpine state & reveal result
+                    this.currentRotation = targetRotation;
+                    this.isSpinning      = false;
+                    this.winner          = { name: visitorName, prize: prizeName, claimCode };
+                    // Play win/zonk sound
+                    setTimeout(() => {
+                        const winAudio  = document.getElementById('audio-win');
+                        const zonkAudio = document.getElementById('audio-zonk');
+                        if (isZonk && zonkAudio) {
+                            zonkAudio.currentTime = 0;
+                            zonkAudio.play().catch(()=>{});
+                        } else if (!isZonk && winAudio) {
+                            winAudio.currentTime = 0;
+                            winAudio.play().catch(()=>{});
+                        }
+                    }, 100); // slight delay for dramatic effect
                     if (isZonk) {
                         this.state = 'zonk';
                         this._startDismissBar('dismiss-bar-zonk', 6000);
@@ -272,16 +310,10 @@ function tvDisplay() {
                         this.state = 'winner';
                         this._startDismissBar('dismiss-bar', 7000);
                     }
-                    return;
                 }
-                const { deg, dur, ease } = phases[phaseIdx];
-                nextRotation += deg;
-                this.transitionStyle = `transform ${dur}ms ${ease}`;
-                this.currentRotation = nextRotation;
-                phaseIdx++;
-                setTimeout(doPhase, dur);
             };
-            doPhase();
+
+            requestAnimationFrame(animate);
         },
 
         /**
