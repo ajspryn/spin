@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force DB reconnect if connection is lost (for long idle apps)
+        \Illuminate\Support\Facades\DB::reconnector(function ($connection) {
+            $connection->disconnect();
+            $connection->reconnect();
+        });
     }
 }

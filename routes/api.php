@@ -19,3 +19,8 @@ Route::get('/prizes', [SpinController::class, 'prizes'])->name('api.prizes');
 Route::post('/spin/execute', [SpinController::class, 'execute'])
      ->middleware(['web'])          // needs session + CSRF
      ->name('api.spin.execute');
+
+// Session keep-alive endpoint
+Route::post('/ping', function () {
+     return response()->json(['pong' => true]);
+})->middleware(['web'])->name('api.ping');
