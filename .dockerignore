@@ -1,0 +1,12 @@
+.git
+node_modules
+vendor
+storage
+.env
+.vscode
+Dockerfile
+docker-compose.yml
+docker
+public/sounds
+tests
+README.md

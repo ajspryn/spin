@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+    # 1. Aplikasi Utama (Laravel + FrankenPHP)
+    app:
+        image: dunglas/frankenphp:latest-php8.3
+        container_name: lucky_spin_app
+        restart: always
+        ports:
+            - "85:80" # Akses aplikasi lewat port 85
+        volumes:
+            - ./:/app
+        environment:
+            - USER=www-data
+
+    # 2. WebSocket Server (Laravel Reverb Worker)
+    reverb:
+        image: dunglas/frankenphp:latest-php8.3
+        container_name: lucky_spin_reverb
+        restart: always
+        ports:
+            - "8585:8080" # Jalur Reverb lewat port 8585
+        volumes:
+            - ./:/app
+        command: php /app/artisan reverb:start --host=0.0.0.0 --port=8080
+        depends_on:
+            - app

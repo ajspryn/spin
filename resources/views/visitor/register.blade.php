@@ -43,7 +43,7 @@
                     @enderror
                 </div>
 
-                {{-- Email (optional) --}}
+                {{-- Email (opsional) --}}
                 <div class="mb-5">
                     <label for="email" class="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Alamat Email <span class="text-gray-500 font-normal">(opsional)</span></label>
                     <input
@@ -57,14 +57,15 @@
                     @enderror
                 </div>
 
-                {{-- WhatsApp (optional) --}}
+                {{-- WhatsApp (wajib) --}}
                 <div class="mb-8">
-                    <label for="whatsapp" class="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Nomor WhatsApp <span class="text-gray-500 font-normal">(opsional)</span></label>
+                    <label for="whatsapp" class="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Nomor WhatsApp <span class="text-red-500 font-normal">*</span></label>
                     <input
                         id="whatsapp" name="whatsapp" type="tel"
                         value="{{ old('whatsapp') }}"
                         placeholder="+62 812 3456 7890"
                         class="w-full bg-white/5 border @error('whatsapp') border-red-500 @else border-white/10 @enderror rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-600/70 focus:border-red-600/50 transition"
+                        required
                     >
                     @error('whatsapp')
                         <p class="mt-1.5 text-xs text-red-400 flex items-center gap-1">⚠ {{ $message }}</p>

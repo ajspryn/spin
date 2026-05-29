@@ -24,8 +24,11 @@ class VisitorController extends Controller
 
           $data = $request->validate([
                'name'      => ['required', 'string', 'max:100'],
+               'whatsapp'  => ['required', 'string', 'regex:/^[0-9\+\-\s]+$/', 'max:20'],
                'email'     => ['nullable', 'email', 'max:150'],
-               'whatsapp'  => ['nullable', 'string', 'regex:/^[0-9\+\-\s]+$/', 'max:20'],
+          ], [
+               'name.required' => 'Nama wajib diisi.',
+               'whatsapp.required' => 'Nomor WhatsApp wajib diisi.',
           ]);
 
           // Normalise WhatsApp number (strip spaces/dashes for consistent check)
