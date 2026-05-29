@@ -34,5 +34,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/simulate-spin', [DashboardController::class, 'simulateSpin'])->name('simulate-spin');
 
         Route::resource('prizes', PrizeController::class)->except(['show']);
+            Route::delete('/winners/{id}', [\App\Http\Controllers\Admin\SpinLogController::class, 'destroy'])->name('winners.destroy');
     });
 });

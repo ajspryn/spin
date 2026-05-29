@@ -335,10 +335,17 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-gray-400">{{ $log->created_at->format('d M, H:i') }}</td>
+                       <td class="px-6 py-4">
+                           <form method="POST" action="{{ route('admin.winners.destroy', $log->id) }}" onsubmit="return confirm('Yakin hapus pemenang ini dan kembalikan stok hadiah?')">
+                               @csrf
+                               @method('DELETE')
+                               <button type="submit" class="text-xs text-red-400 hover:text-white bg-red-900/40 hover:bg-red-700/60 border border-red-900/50 hover:border-red-700/60 rounded px-3 py-1 transition">Hapus</button>
+                           </form>
+                       </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-10 text-center text-gray-600">No spins recorded yet.</td>
+                    <td colspan="7" class="px-6 py-10 text-center text-gray-600">No spins recorded yet.</td>
                 </tr>
                 @endforelse
             </tbody>
